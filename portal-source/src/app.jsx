@@ -7,6 +7,7 @@ import { isAdminUser } from "./session.js";
 import { CREAM, NAVY, NAVY_DARK } from "./theme.js";
 import { Btn, Field } from "./ui.jsx";
 import { reportClientError } from "./client-utils.js";
+import { AdminPortal } from "./application/AdminPortal.jsx";
 import { PortalShell } from "./application/ApplicationPortals.jsx";
 import { CrossPortalNav } from "./application/CrossPortalNav.jsx";
 import {
@@ -121,7 +122,7 @@ export default function PortalRobin() {
     let next = null;
     try { next = new URLSearchParams(window.location.search).get("next"); } catch (_) {}
     if (admin) {
-      if (pathname !== "/admin") {
+      if (next === "/admin" || pathname === "/login") {
         landingHandled.current = true;
         window.location.replace("/admin");
       }
@@ -243,9 +244,10 @@ export default function PortalRobin() {
     );
   }
 
-  if (authState.user && isAdminUser(authState.user)) {
-    return <div className="min-h-screen grid place-items-center" style={{ background: CREAM }}><Loader2 className="h-5 w-5 animate-spin" aria-label="Abriendo el portal del administrador" /></div>;
-  }
+  if (authState.user && isAdminUser(authState.user)) return <>
+    <CrossPortalNav current="application" user={authState.user} onLogout={handleLogout} />
+    <AdminPortal user={authState.user} />
+  </>;
 
   if (!authState.user) return <LoginScreen onLogin={handleLogin} onBack={() => window.location.assign("/login")} />;
   if (authState.user.auth_source === "external_client") return <>
